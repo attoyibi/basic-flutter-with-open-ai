@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'config.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,33 +31,42 @@ class _MyFormState extends State<MyForm> {
   String _response = '';
 
   Future<void> _submitForm() async {
+    String key = AppConfig().openaiApiKey;
     if (_formKey.currentState!.validate()) {
-      String inputData = _textController.text;
-
-      // Replace 'YOUR_OPENAI_API_KEY' with your actual OpenAI API key
-      String apiKey = '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';
+      final apiKey = key; // Ganti dengan kunci API OpenAI Anda
+      const apiUrl =
+          'https://api.openai.com/v1/completions'; // Ganti dengan URL endpoint yang sesuai
+      // const apiUrl =
+      //     'https://api.openai.com/v1/chat/completions'; // Ganti dengan URL endpoint yang sesuai
 
       final response = await http.post(
-        Uri.parse(
-            'https://api.openai.com/v1/engines/davinci-codex/completions'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
+        Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json;charset=UTF-8',
+          'Charset': 'utf-8',
+          'Authorization': 'Bearer $apiKey'
         },
-        body: jsonEncode({
-          'prompt': inputData,
-          'max_tokens': 50, // Adjust as needed
+        body: jsonEncode(<String, dynamic>{
+          // "model": "gpt-3.5-turbo",
+          "model": "text-davinci-003",
+          'prompt': _textController.text,
+          'max_tokens': 50, // Jumlah token maksimum dalam respons
         }),
       );
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> data = jsonDecode(response.body);
+        // Berhasil mendapatkan respons dari server
+        final responseData = jsonDecode(response.body);
+        print('Respon sukses: ${responseData['choices'][0]['text']}');
         setState(() {
-          _response = data['choices'][0]['text'];
+          _response = responseData['choices'][0]['text'];
         });
       } else {
-        print('Request failed with status: ${response.statusCode}');
+        // Gagal mendapatkan respons dari server
+        print('Gagal mendapatkan respons. Kode status: ${response.statusCode}');
       }
+    } else {
+      print('else inside if: ');
     }
   }
 
@@ -85,9 +95,9 @@ class _MyFormState extends State<MyForm> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: Text('Submit'),
+                child: const Text('Submit'),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text('Response: $_response'),
             ],
           ),
