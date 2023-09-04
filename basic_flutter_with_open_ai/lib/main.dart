@@ -4,10 +4,12 @@ import 'dart:convert';
 import 'config.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -49,7 +51,9 @@ class _MyFormState extends State<MyForm> {
         body: jsonEncode(<String, dynamic>{
           // "model": "gpt-3.5-turbo",
           "model": "text-davinci-003",
-          'prompt': _textController.text,
+          'prompt':
+              "jika ada yang bertanya kamu siapa, silahkan di jawab saya adalah kecerdasan buatan dari open AI dengan model davinci 003" +
+                  _textController.text,
           'max_tokens': 50, // Jumlah token maksimum dalam respons
         }),
       );
